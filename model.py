@@ -17,8 +17,9 @@ class Model():
         self.training_phase = tf.placeholder(tf.bool)
         self.rnn_keep_prob = tf.placeholder(tf.float32)
 
-        self.tokens_placeholder = tf.placeholder(tf.float32, [None, config.max_seq_len, config.n_features])
-        self.labels_placeholder = tf.placeholder(tf.int64, [None, config.n_classes])
+
+        self.tokens_placeholder = tf.placeholder(tf.float32, [config.max_seq_len, config.n_features])
+        self.labels_placeholder = tf.placeholder(tf.int64, None)
         self.test_tokens_placeholder = tf.placeholder(tf.float32)
         self.test_labels_placeholder = tf.placeholder(tf.int64)
 
@@ -35,8 +36,8 @@ class Model():
         self.train_iterator = train_dataset.make_initializable_iterator()
         self.test_iterator = test_dataset.make_initializable_iterator()
 
-         #import pdb; pdb.set_trace()
-
+        #import pdb; pdb.set_trace()
+    
         if evaluate:
             self.example = self.tokens_placeholder
             self.labels = self.labels_placeholder
@@ -53,11 +54,11 @@ class Model():
         self.softmax, self.pred = tf.nn.softmax(self.logits), tf.argmax(self.logits, 1)
 
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        #self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels)
-        self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.labels)
+        self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels)
         self.cost = tf.reduce_mean(self.cross_entropy)
 
-        epoch_bounds = [64, 128, 256, 420, 512, 720, 1024]
+        #epoch_bounds = [64, 128, 256, 420, 512, 720, 1024]
+        epoch_bounds = [1,3,4,5,6,7,8]
         lr_values = [1e-3, 4e-4, 1e-4, 6e-5, 1e-5, 6e-6, 1e-6, 2e-7]
 
         learning_rate = tf.train.piecewise_constant(self.global_step, boundaries=[s*steps_per_epoch for s in

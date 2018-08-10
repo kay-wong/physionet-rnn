@@ -49,8 +49,8 @@ class embedding_config(object):
     
     
 class directories(object):
-    train = '../data/tfrecords_tst/train' 
-    test = '../data/tfrecords_tst/test'  #'../data/REQ/REQ_tokenized_test.h5'
+    train = '../data/tfrecords/valid' 
+    test = '../data/tfrecords/test'  #'../data/REQ/REQ_tokenized_test.h5'
     eval = '../data/REQ/REQ_tokenized_test.h5'
     vocabulary = '../data/REQ/REQ_vocab.csv'
     embedding = '../data/pretrained_vectors/glove.6B.50d.txt'
