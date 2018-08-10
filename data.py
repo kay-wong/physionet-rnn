@@ -14,7 +14,7 @@ class Data(object):
         def _parse_tfrecords(proto_f):
             # Parse each record into tensors
             keys_to_features = {'features':tf.FixedLenFeature((config_train.max_seq_len, config_train.n_features), tf.float32),
-                            'y': tf.FixedLenFeature((), tf.int64)}
+                            'y': tf.FixedLenFeature((2), tf.int64)}
             parsed_features = tf.parse_single_example(proto_f, keys_to_features)            
             return parsed_features['features'], parsed_features['y']
 
