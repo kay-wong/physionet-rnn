@@ -16,13 +16,15 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 def evaluate(config, directories, ckpt, args):
     pin_cpu = tf.ConfigProto(allow_soft_placement=True, device_count = {'GPU':0})
     start = time.time()
-    eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
-    eval_tokens, eval_labels = Data.load_data_tfrecords(eval_record_paths)
+    #eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
+    #eval_tokens, eval_labels = Data.load_data_tfrecords(eval_record_paths)
+    
+        
 
     # Build graph
-    cnn = Model(config, directories, directories.train, directories.test, args=args, evaluate=True)
+    model = Model(config, directories, directories.train, directories.test, args=args, evaluate=True)
     # Restore the moving average version of the learned variables for eval.
-    variables_to_restore = cnn.ema.variables_to_restore()
+    variables_to_restore = model.ema.variables_to_restore()
     saver = tf.train.Saver(variables_to_restore)
 
     with tf.Session(config=pin_cpu) as sess:
@@ -41,10 +43,18 @@ def evaluate(config, directories, ckpt, args):
                 new_saver.restore(sess, args.restore_path)
                 print('Previous checkpoint {} restored.'.format(args.restore_path))
 
-        eval_dict = {cnn.training_phase: False, cnn.example: eval_tokens, cnn.labels: eval_labels}
+        #eval_dict = {model.training_phase: False, model.example: eval_tokens, model.labels: eval_labels}
 
-        y_pred, v_acc = sess.run([cnn.pred,cnn.accuracy], feed_dict=eval_dict)
-        v_f1 = f1_score(eval_labels, y_pred, average='macro', labels=np.unique(y_pred))
+        #y_pred, v_acc = sess.run([model.pred,model.accuracy], feed_dict=eval_dict)
+        #v_f1 = f1_score(eval_labels, y_pred, average='macro', labels=np.unique(y_pred))
+        #test_handle = sess.run(model.test_iterator.string_handle())
+        eval_handle = sess.run(model.eval_iterator.string_handle())
+        feed_dict_test = {model.training_phase: False, model.handle: eval_handle}
+        
+        sess.run(model.eval_iterator.initializer)
+        v_acc, y_true, y_pred = sess.run([model.accuracy, model.labels, model.pred], feed_dict=feed_dict_test)
+        v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
+
 
         print("Validation accuracy: {:.3f}".format(v_acc))
         print("Validation F1: {:.3f}".format(v_f1))

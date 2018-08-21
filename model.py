@@ -37,16 +37,20 @@ class Model():
         self.test_iterator = test_dataset.make_initializable_iterator()
 
         #import pdb; pdb.set_trace()
-    
+                
         if evaluate:
-            self.example = self.tokens_placeholder
-            self.labels = self.labels_placeholder
+            eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
+            eval_dataset = Data.load_dataset_tfrecords(eval_record_paths, config.batch_size, test=True)
+            self.eval_iterator = eval_dataset.make_initializable_iterator()
+            self.example, self.labels = self.iterator.get_next()
+
             self.logits = arch(self.example, config, self.training_phase)
             self.softmax, self.pred = tf.nn.softmax(self.logits), tf.argmax(self.logits, 1)
             self.ema = tf.train.ExponentialMovingAverage(decay=config.ema_decay, num_updates=self.global_step)
             correct_prediction = tf.equal(self.labels, tf.cast(self.pred, tf.int64))
             self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
             return
+
         else:
             self.example, self.labels = self.iterator.get_next()
 
