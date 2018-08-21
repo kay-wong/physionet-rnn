@@ -4,7 +4,7 @@ class config_train(object):
     mode = 'beta'
     n_layers = 5
     num_epochs = 24
-    batch_size = 256
+    batch_size = 128
     ema_decay = 0.999
     learning_rate = 1e-4
     momentum = 0.9
@@ -27,7 +27,7 @@ class config_test(object):
     mode = 'alpha'
     n_layers = 5
     num_epochs = 25
-    batch_size = 256
+    batch_size = 128
     ema_decay = 0.999
     learning_rate = 1e-4
     momentum = 0.9
@@ -49,9 +49,9 @@ class embedding_config(object):
     
     
 class directories(object):
-    train = '../data/tfrecords/valid' 
+    train = '../data/tfrecords/train' 
     test = '../data/tfrecords/test'  #'../data/REQ/REQ_tokenized_test.h5'
-    eval = '../data/REQ/REQ_tokenized_test.h5'
+    eval = '../data/tfrecords/valid' 
     vocabulary = '../data/REQ/REQ_vocab.csv'
     embedding = '../data/pretrained_vectors/glove.6B.50d.txt'
     ft_embedding = '../data/pretrained_vectors/REQ_cn_ft.bin'

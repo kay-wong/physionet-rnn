@@ -60,12 +60,12 @@ def train(config, args):
 
                 except KeyboardInterrupt:
                     save_path = saver.save(sess, os.path.join(directories.checkpoints,
-                        'bcmp_{}_last.ckpt'.format(args.name)), global_step=epoch)
+                        '{0}/bcmp_{0}_last.ckpt'.format(args.name)), global_step=epoch)
                     print('Interrupted, model saved to: ', save_path)
                     sys.exit()
 
         save_path = saver.save(sess, os.path.join(directories.checkpoints,
-                               'bcmp_{}_end.ckpt'.format(args.name)),
+                               '{0}/bcmp_{0}_end.ckpt'.format(args.name)),
                                global_step=epoch)
 
     print("Training Complete. Model saved to file: {} Time elapsed: {:.3f} s".format(save_path, time.time()-start_time))

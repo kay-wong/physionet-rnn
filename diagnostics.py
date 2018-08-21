@@ -56,12 +56,12 @@ class Diagnostics(object):
             improved = '[*]'
             if epoch>5:
                 save_path = saver.save(sess,
-                            os.path.join(directories.checkpoints_best, 'crnn_{}_epoch{}.ckpt'.format(name, epoch)),
+                            os.path.join(directories.checkpoints_best, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)),
                             global_step=epoch)
                 print('Graph saved to file: {}'.format(save_path))
 
         if epoch % 10 == 0 and epoch>10:
-            save_path = saver.save(sess, os.path.join(directories.checkpoints, 'crnn_{}_epoch{}.ckpt'.format(name, epoch)), global_step=epoch)
+            save_path = saver.save(sess, os.path.join(directories.checkpoints, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)), global_step=epoch)
             print('Graph saved to file: {}'.format(save_path))
 
         msg = 'Epoch {} | Training Acc: {:.3f} | Test Acc: {:.3f} | Test F1: {:.3f} | Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, t_acc, v_acc, v_f1, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)

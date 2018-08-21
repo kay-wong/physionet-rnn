@@ -97,8 +97,8 @@ class Model():
         self.merge_op = tf.summary.merge_all()
 
         self.train_writer = tf.summary.FileWriter(
-            #os.path.join(directories.tensorboard, '{}_train_{}'.format(args.name, time.strftime('%d-%m_%I:%M'))), graph=tf.get_default_graph())
-            os.path.join(directories.tensorboard, '{}_train_{}'.format(args.name, config.embedding)), graph=tf.get_default_graph())
+            os.path.join(directories.tensorboard, '{0}/{0}_train_{1}'.format(args.name, time.strftime('%d-%m_%I:%M'))), graph=tf.get_default_graph())
+            #os.path.join(directories.tensorboard, '{}_train_{}'.format(args.name, config.embedding)), graph=tf.get_default_graph())
         self.test_writer = tf.summary.FileWriter(
-            #os.path.join(directories.tensorboard, '{}_test_{}'.format(args.name, time.strftime('%d-%m_%I:%M'))))
-            os.path.join(directories.tensorboard, '{}_test_{}'.format(args.name, config.embedding)))
+            os.path.join(directories.tensorboard, '{0}/{0}_test_{1}'.format(args.name, time.strftime('%d-%m_%I:%M'))))
+            #os.path.join(directories.tensorboard, '{}_test_{}'.format(args.name, config.embedding)))

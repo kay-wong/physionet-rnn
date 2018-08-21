@@ -17,6 +17,7 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 def evaluate(config, directories, ckpt, args):
     pin_cpu = tf.ConfigProto(allow_soft_placement=True, device_count = {'GPU':0})
     start = time.time()
+    eval_dataset = Data.load_tfrecords(directories.eval, config.batch_size)
     eval_tokens, eval_labels = Data.load_data(directories.eval)
 
     # Build graph
