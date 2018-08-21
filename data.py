@@ -9,25 +9,43 @@ from config import config_train, config_test, directories
 class Data(object):
 
     @staticmethod
-    def load_tfrecords(tfrec_paths, batch_size, test=False):
-
-        def _parse_tfrecords(proto_f):
+    def _parse_tfrecords(proto_f):
             # Parse each record into tensors
             keys_to_features = {'features':tf.FixedLenFeature((config_train.max_seq_len, config_train.n_features), tf.float32),
                             'y': tf.FixedLenFeature((), tf.int64)}
             parsed_features = tf.parse_single_example(proto_f, keys_to_features)            
             return parsed_features['features'], parsed_features['y']
 
+    @staticmethod
+    def load_dataset_tfrecords(tfrec_paths, batch_size, test=False):
         dataset = tf.data.TFRecordDataset(tfrec_paths)
-        dataset = dataset.map(_parse_tfrecords)  
+        dataset = dataset.map(Data._parse_tfrecords)  
         dataset = dataset.shuffle(buffer_size=1024)
         dataset = dataset.batch(batch_size)
-
+        
         if test:
             dataset = dataset.repeat()  
-        
+
         return dataset
 
+    @staticmethod
+    def load_data_tfrecords(tfrec_paths):
+
+        ds_size = len(tfrec_paths)
+        dataset = tf.data.TFRecordDataset(tfrec_paths)
+        dataset = dataset.map(Data._parse_tfrecords)  
+        dataset = dataset.shuffle(buffer_size=1024)
+        dataset = dataset.batch(ds_size-1)
+        
+        ds_iterator = dataset.make_one_shot_iterator()
+        X, y = ds_iterator.get_next()
+    
+        with tf.Session() as sess:
+            example = sess.run(X)
+            labels = sess.run(y)
+
+        return example, labels
+    
     @staticmethod
     def load_data(filename):
         df = pd.read_hdf(filename, key='df').sample(frac=1).reset_index(drop=True)

@@ -12,7 +12,9 @@ class Network(object):
          # reshape outputs to [batch_size, max_time_steps, n_features]
         #max_time = tf.shape(x)[1]
         #rnn_inputs = tf.reshape(x, [-1, max_time, config.embedding_dim])
-        rnn_inputs = x
+        #rnn_inputs = x
+        rnn_inputs = tf.reshape(x, [-1, config.max_seq_len, config.n_features])
+
         sequence_lengths = Diagnostics.length(rnn_inputs)
         init = tf.contrib.layers.xavier_initializer()
 

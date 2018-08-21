@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 import tensorflow as tf
 import numpy as np
-import time, os
-import argparse
+import time, os, glob, argparse
 from sklearn.metrics import f1_score
 
 # User-defined
@@ -17,12 +16,11 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 def evaluate(config, directories, ckpt, args):
     pin_cpu = tf.ConfigProto(allow_soft_placement=True, device_count = {'GPU':0})
     start = time.time()
-    eval_dataset = Data.load_tfrecords(directories.eval, config.batch_size)
-    eval_tokens, eval_labels = Data.load_data(directories.eval)
+    eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
+    eval_tokens, eval_labels = Data.load_data_tfrecords(eval_record_paths)
 
     # Build graph
-    cnn = Model(config, directories, tokens=eval_tokens, labels=eval_labels, args=args, evaluate=True)
-
+    cnn = Model(config, directories, directories.train, directories.test, args=args, evaluate=True)
     # Restore the moving average version of the learned variables for eval.
     variables_to_restore = cnn.ema.variables_to_restore()
     saver = tf.train.Saver(variables_to_restore)
@@ -32,7 +30,7 @@ def evaluate(config, directories, ckpt, args):
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         sess.run(tf.tables_initializer())
-        assert (ckpt.model_checkpoint_path), 'Missing checkpoint file!'
+        #assert (ckpt.model_checkpoint_path), 'Missing checkpoint file!'
 
         if args.restore_last and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
@@ -58,8 +56,9 @@ def evaluate(config, directories, ckpt, args):
 def main(**kwargs):
     parser = argparse.ArgumentParser()
 #     parser.add_argument("-i", "--input", help="path to test dataset in h5 format")
-    parser.add_argument("-rl", "--restore_last", help="restore last saved model", action="store_true")
     parser.add_argument("-r", "--restore_path", help="path to model to be restored", type=str)
+    parser.add_argument("-rl", "--restore_last", help="restore last saved model", action="store_true")
+
     args = parser.parse_args()
 
     # Load training, test data

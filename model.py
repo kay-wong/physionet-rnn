@@ -27,8 +27,8 @@ class Model():
         test_record_paths = glob.glob('{}/*.record'.format(test_path))
         steps_per_epoch = len(train_record_paths)//config.batch_size
 
-        train_dataset = Data.load_tfrecords(train_record_paths, config.batch_size)
-        test_dataset = Data.load_tfrecords(test_record_paths, config.batch_size, test=True)
+        train_dataset = Data.load_dataset_tfrecords(train_record_paths, config.batch_size)
+        test_dataset = Data.load_dataset_tfrecords(test_record_paths, config.batch_size, test=True)
         self.iterator = tf.data.Iterator.from_string_handle(self.handle,
                                                                     train_dataset.output_types,
                                                                     train_dataset.output_shapes)
