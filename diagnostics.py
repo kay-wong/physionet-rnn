@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 import numpy as np
 import os, time
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, recall_score, precision_score
 
 class Diagnostics(object):
     
@@ -34,7 +34,7 @@ class Diagnostics(object):
 
     @staticmethod
     def run_diagnostics(model, config, directories, sess, saver, train_handle,
-            test_handle, start_time, v_f1_best, epoch, name):
+            test_handle, start_time, v_s1_best, epoch, name):
         t0 = time.time()
         improved = ''
         sess.run(tf.local_variables_initializer())
@@ -49,10 +49,14 @@ class Diagnostics(object):
 
         v_acc, v_loss, v_summary, y_true, y_pred = sess.run([model.accuracy, model.cost, model.merge_op, model.labels, model.pred], feed_dict=feed_dict_test)
         model.test_writer.add_summary(v_summary)
+        print(y_pred)
+        print(y_true)
         v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
+        v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        v_s1 = min(v_acc, v_sensitivity)
 
-        if v_f1 > v_f1_best:
-            v_f1_best = v_f1
+        if v_s1 > v_s1_best:
+            v_s1_best = v_s1
             improved = '[*]'
             if epoch>5:
                 save_path = saver.save(sess,
@@ -64,9 +68,14 @@ class Diagnostics(object):
             save_path = saver.save(sess, os.path.join(directories.checkpoints, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)), global_step=epoch)
             print('Graph saved to file: {}'.format(save_path))
 
-        msg = 'Epoch {} | Training Acc: {:.3f} | Test Acc: {:.3f} | Test F1: {:.3f} | Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, t_acc, v_acc, v_f1, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
+        msg = 'Epoch {} | S1: {:.3f} | Training Acc: {:.3f} | Test Acc/+P: {:.3f} | Test F1: {:.3f} | Test Se: {:.3f}| Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, v_s1, t_acc, v_acc, v_f1, v_sensitivity, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
         print(msg)
-        with open(os.path.join(directories.trainlogs, '{}_{}.txt'.format(name, config.embedding)), 'a') as f:
+        with open(os.path.join(directories.trainlogs, '{}.txt'.format(name)), 'a') as f:
             f.write(msg)
             f.write('\n')
-        return v_f1_best
+        return v_s1_best
+
+    
+    @staticmethod
+    def print_x(x):
+        print(x)

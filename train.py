@@ -17,11 +17,11 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 def train(config, args):
 
     start_time = time.time()
-    global_step, n_checkpoints, v_f1_best = 0, 0, 0.
+    global_step, n_checkpoints, v_s1_best = 0, 0, 0.
     ckpt = tf.train.get_checkpoint_state(directories.checkpoints)
-
+    
     # Build graph
-    cnn = Model(config, directories, directories.train, directories.test, args=args)
+    cnn = Model(config, directories, args=args)
     saver = tf.train.Saver()
 
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True, log_device_placement=False)) as sess:
@@ -46,8 +46,8 @@ def train(config, args):
             sess.run(cnn.train_iterator.initializer)
 
             # Run diagnostics
-            v_f1_best = Diagnostics.run_diagnostics(cnn, config_train, directories, sess, saver, train_handle,
-                test_handle, start_time, v_f1_best, epoch, args.name)
+            v_s1_best = Diagnostics.run_diagnostics(cnn, config_train, directories, sess, saver, train_handle,
+                test_handle, start_time, v_s1_best, epoch, args.name)
             while True:
                 try:
                     # Update weights
@@ -79,7 +79,6 @@ def main(**kwargs):
     args = parser.parse_args()
     config = config_train
 
-    print("Training with {}".format(config.embedding))
     # Launch training
     train(config, args)
 
