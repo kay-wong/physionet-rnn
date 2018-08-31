@@ -8,9 +8,7 @@ class config_train(object):
     ema_decay = 0.999
     learning_rate = 1e-4
     momentum = 0.9
-    vocab_size = 3002
     rnn_layers = 2
-    embedding_dim = 100
     rnn_cell = 'gru'
     hidden_units = 256
     output_keep_prob = 0.75
@@ -19,9 +17,6 @@ class config_train(object):
     recurrent_keep_prob = 0.8
     conv_keep_prob = 0.5
     n_classes = 2
-    embedding= 'train'
-    #embedding= 'glove_50d'
-    #embedding= 'fasttext'
 
 class config_test(object):
     mode = 'alpha'
@@ -31,9 +26,7 @@ class config_test(object):
     ema_decay = 0.999
     learning_rate = 1e-4
     momentum = 0.9
-    vocab_size = 3002
     rnn_layers = 2
-    embedding_dim = 100
     rnn_cell = 'gru'
     hidden_units = 256
     output_keep_prob = 0.75
@@ -43,18 +36,11 @@ class config_test(object):
     conv_keep_prob = 1.0
     n_classes = 2
 
-class embedding_config(object):
-    pretrained = False
-    embedding_dim = 50
-    
     
 class directories(object):
     train = '../data/tfrecords/train' 
-    test = '../data/tfrecords/test'  #'../data/REQ/REQ_tokenized_test.h5'
-    eval = '../data/tfrecords/valid' 
-    vocabulary = '../data/REQ/REQ_vocab.csv'
-    embedding = '../data/pretrained_vectors/glove.6B.50d.txt'
-    ft_embedding = '../data/pretrained_vectors/REQ_cn_ft.bin'
+    test = '../data/tfrecords/test' 
+    eval = '../data/tfrecords/setc'
 
     tensorboard = 'tensorboard'
     checkpoints = 'checkpoints'
