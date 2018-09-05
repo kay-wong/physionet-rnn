@@ -53,6 +53,8 @@ class Diagnostics(object):
         print(y_true)
         v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
         v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        if v_sensitivity==1:
+            v_sensitivity=0
         v_s1 = min(v_acc, v_sensitivity)
 
         if v_s1 > v_s1_best:

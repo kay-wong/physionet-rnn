@@ -32,7 +32,7 @@ class Model():
         c1_paths = glob.glob(CLASS1_DIR+'/*.record')
         mid = len(c1_paths)//2
 
-        train_record_paths, test_record_paths = train_test_split(c0_paths[:1000], train_size = 0.9, random_state=42)
+        train_record_paths, test_record_paths = train_test_split(c0_paths[:800], train_size = 0.9, random_state=42)
         train_record_paths.extend(c1_paths[:mid])
         test_record_paths.extend(c1_paths[mid:])
         #train_record_paths = glob.glob('{}/*.record'.format(directories.train))
@@ -79,7 +79,8 @@ class Model():
         #Diagnostics.print_x(hm)
         #print(self.logits)
         #print(self.pred)
-        self.cross_entropy = tf.nn.weighted_cross_entropy_with_logits(targets=tf.cast(self.labels, tf.float32), logits=hm, pos_weight=1.2)
+        #1.2
+        self.cross_entropy = tf.nn.weighted_cross_entropy_with_logits(targets=tf.cast(self.labels, tf.float32), logits=hm, pos_weight=0.2)
         
         self.cost = tf.reduce_mean(self.cross_entropy)
 

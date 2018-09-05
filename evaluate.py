@@ -2,7 +2,7 @@
 import tensorflow as tf
 import numpy as np
 import time, os, glob, argparse
-from sklearn.metrics import f1_score, recall_score
+from sklearn.metrics import f1_score, recall_score, precision_score, confusion_matrix
 
 # User-defined
 from network import Network
@@ -54,13 +54,21 @@ def evaluate(config, directories, ckpt, args):
         sess.run(model.eval_iterator.initializer)
         v_acc, y_true, y_pred = sess.run([model.accuracy, model.labels, model.pred], feed_dict=feed_dict_eval)
         v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
-        v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        #v_sensitivity = recall_score(y_true, y_pred,  average='macro', labels=np.unique(y_pred))
+        #v_p = precision_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
+        
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        v_acc = (tp+fn)/(tp+fp+fn+tn)
+        v_sensitivity = tp/(tp+fn)
+        v_p = tp/(tp+fp)
+
 
         results_preds = pd.DataFrame({'True': y_true, 'Pred':y_pred})
         results_preds.to_csv('PredOutputs_setc.csv')
 
-        print("Validation accuracy/+P: {:.3f}".format(v_acc))
+        print("Validation accuracy: {:.3f}".format(v_acc))
         print("Validation Se: {:.3f}".format(v_sensitivity))
+        print("Validation P: {:.3f}".format(v_p))
         print("Validation F1: {:.3f}".format(v_f1))
         print("Eval complete. Duration: %g s" %(time.time()-start))
 
