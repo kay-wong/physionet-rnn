@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.python.client import device_lib
 import numpy as np
 import os, time
-from sklearn.metrics import f1_score, recall_score, precision_score
+from sklearn.metrics import f1_score, recall_score, precision_score, confusion_matrix
 
 class Diagnostics(object):
     
@@ -51,11 +51,15 @@ class Diagnostics(object):
         model.test_writer.add_summary(v_summary)
         print(y_pred)
         print(y_true)
-        v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
-        v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        #v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
+        #v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        v_sensitivity = tp/(tp+fn)
+        v_p = tp/(tp+fp)
+
         if v_sensitivity==1:
             v_sensitivity=0
-        v_s1 = min(v_acc, v_sensitivity)
+        v_s1 = min(v_p, v_sensitivity)
 
         if v_s1 > v_s1_best:
             v_s1_best = v_s1
@@ -70,7 +74,7 @@ class Diagnostics(object):
             save_path = saver.save(sess, os.path.join(directories.checkpoints, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)), global_step=epoch)
             print('Graph saved to file: {}'.format(save_path))
 
-        msg = 'Epoch {} | S1: {:.3f} | Training Acc: {:.3f} | Test Acc/+P: {:.3f} | Test F1: {:.3f} | Test Se: {:.3f}| Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, v_s1, t_acc, v_acc, v_f1, v_sensitivity, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
+        msg = 'Epoch {} | S1: {:.3f} | Training Acc: {:.3f} | Test Acc/+P: {:.3f} | Test Se: {:.3f}| Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, v_s1, t_acc, v_acc, v_sensitivity, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
         print(msg)
         with open(os.path.join(directories.trainlogs, '{}.txt'.format(name)), 'a') as f:
             f.write(msg)

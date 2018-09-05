@@ -32,7 +32,7 @@ class Model():
         c1_paths = glob.glob(CLASS1_DIR+'/*.record')
         mid = len(c1_paths)//2
 
-        train_record_paths, test_record_paths = train_test_split(c0_paths[:800], train_size = 0.9, random_state=42)
+        train_record_paths, test_record_paths = train_test_split(c0_paths, train_size = 0.9, random_state=42)
         train_record_paths.extend(c1_paths[:mid])
         test_record_paths.extend(c1_paths[mid:])
         #train_record_paths = glob.glob('{}/*.record'.format(directories.train))
@@ -86,7 +86,7 @@ class Model():
 
         #epoch_bounds = [64, 128, 256, 420, 512, 720, 1024]
         #epoch_bounds = [1,3,4,5,6,7,8]
-        epoch_bounds = [1,5,6,7,9,11,12]
+        epoch_bounds = [1,2,6,7,9,11,12]
         lr_values = [1e-3, 4e-4, 1e-4, 6e-5, 1e-5, 6e-6, 1e-6, 2e-7]
 
         learning_rate = tf.train.piecewise_constant(self.global_step, boundaries=[s*steps_per_epoch for s in
