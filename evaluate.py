@@ -21,7 +21,6 @@ def evaluate(config, directories, ckpt, args):
     #eval_tokens, eval_labels = Data.load_data_tfrecords(eval_record_paths)
     
         
-
     # Build graph
     model = Model(config, directories, args=args, evaluate=True)
     # Restore the moving average version of the learned variables for eval.
@@ -44,27 +43,19 @@ def evaluate(config, directories, ckpt, args):
                 new_saver.restore(sess, args.restore_path)
                 print('Previous checkpoint {} restored.'.format(args.restore_path))
 
-        #eval_dict = {model.training_phase: False, model.example: eval_tokens, model.labels: eval_labels}
-
-        #y_pred, v_acc = sess.run([model.pred,model.accuracy], feed_dict=eval_dict)
-        #v_f1 = f1_score(eval_labels, y_pred, average='macro', labels=np.unique(y_pred))
-        #test_handle = sess.run(model.test_iterator.string_handle())
-        #eval_handle = sess.run(model.eval_iterator.string_handle())
         feed_dict_eval = {model.training_phase: False} 
         sess.run(model.eval_iterator.initializer)
         v_acc, y_true, y_pred = sess.run([model.accuracy, model.labels, model.pred], feed_dict=feed_dict_eval)
         v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
-        #v_sensitivity = recall_score(y_true, y_pred,  average='macro', labels=np.unique(y_pred))
-        #v_p = precision_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
         
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
-        v_acc = (tp+fn)/(tp+fp+fn+tn)
+        v_acc = (tp+tn)/(tp+fp+fn+tn)
         v_sensitivity = tp/(tp+fn)
         v_p = tp/(tp+fp)
 
 
         results_preds = pd.DataFrame({'True': y_true, 'Pred':y_pred})
-        results_preds.to_csv('PredOutputs_setc.csv')
+        results_preds.to_csv('PredOutputs_setc1.csv')
 
         print("Validation accuracy: {:.3f}".format(v_acc))
         print("Validation Se: {:.3f}".format(v_sensitivity))
@@ -77,7 +68,6 @@ def evaluate(config, directories, ckpt, args):
 
 def main(**kwargs):
     parser = argparse.ArgumentParser()
-#     parser.add_argument("-i", "--input", help="path to test dataset in h5 format")
     parser.add_argument("-r", "--restore_path", help="path to model to be restored", type=str)
     parser.add_argument("-rl", "--restore_last", help="restore last saved model", action="store_true")
 

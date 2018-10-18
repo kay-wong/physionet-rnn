@@ -38,8 +38,6 @@ class config_test(object):
 
     
 class directories(object):
-    train = '../data/tfrecords/train' 
-    test = '../data/tfrecords/test' 
     eval = '../data/tfrecords/setc'
 
     tensorboard = 'tensorboard'

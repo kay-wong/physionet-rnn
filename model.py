@@ -26,20 +26,11 @@ class Model():
         self.test_labels_placeholder = tf.placeholder(tf.int64)
         
         # Balanced test distribution
-        CLASS0_DIR = '../data/tfrecords/class0/'
-        CLASS1_DIR = '../data/tfrecords/class1/'
-        c0_paths = glob.glob(CLASS0_DIR+'/*.record')
-        c1_paths = glob.glob(CLASS1_DIR+'/*.record')
-        mid = len(c1_paths)//2
-
-        train_record_paths, test_record_paths = train_test_split(c0_paths, train_size = 0.9, random_state=42)
-        train_record_paths.extend(c1_paths[:mid])
-        test_record_paths.extend(c1_paths[mid:])
-        #train_record_paths = glob.glob('{}/*.record'.format(directories.train))
-        #test_record_paths = glob.glob('{}/*.record'.format(directories.test))
+        train_paths = '../data/tfrecords/seta/'
+        
+        train_record_paths, test_record_paths = train_test_split(train_paths, train_size = 0.6, random_state=42)
         steps_per_epoch = len(train_record_paths)//config.batch_size
         
-
         train_dataset = Data.load_dataset_tfrecords(train_record_paths, config.batch_size)
         test_dataset = Data.load_dataset_tfrecords(test_record_paths, config.batch_size, test=True)
         self.iterator = tf.data.Iterator.from_string_handle(self.handle,
@@ -52,7 +43,6 @@ class Model():
         #import pdb; pdb.set_trace()
                 
         if evaluate:
-            #eval_record_paths = tf.placeholder(tf.string, shape=[])
             eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
             eval_dataset = Data.load_dataset_tfrecords(eval_record_paths, len(eval_record_paths)-1, test=True)
             self.eval_iterator = eval_dataset.make_initializable_iterator()
@@ -72,21 +62,13 @@ class Model():
         self.softmax, self.pred = tf.nn.softmax(self.logits), tf.argmax(self.logits, 1)
 
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        #self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.labels)
-        #self.scaled_error = tf.multiply(self.cross_entropy, class_weight)
-        #self.cost = tf.reduce_mean(self.scaled_error)
-        hm = tf.reduce_max(self.logits, axis=1)
-        #Diagnostics.print_x(hm)
-        #print(self.logits)
-        #print(self.pred)
-        #1.2
-        self.cross_entropy = tf.nn.weighted_cross_entropy_with_logits(targets=tf.cast(self.labels, tf.float32), logits=hm, pos_weight=0.2)
+        logits_red = tf.reduce_max(self.logits, axis=1)
         
+        self.cross_entropy = tf.nn.weighted_cross_entropy_with_logits(targets=tf.cast(self.labels, tf.float32), logits=logits_red, pos_weight=0.2)
         self.cost = tf.reduce_mean(self.cross_entropy)
 
-        #epoch_bounds = [64, 128, 256, 420, 512, 720, 1024]
-        #epoch_bounds = [1,3,4,5,6,7,8]
-        epoch_bounds = [1,2,6,7,9,11,12]
+        # Adaptive learning rate
+        epoch_bounds = [1,20,30,40,50,60,80]
         lr_values = [1e-3, 4e-4, 1e-4, 6e-5, 1e-5, 6e-6, 1e-6, 2e-7]
 
         learning_rate = tf.train.piecewise_constant(self.global_step, boundaries=[s*steps_per_epoch for s in
@@ -108,10 +90,8 @@ class Model():
 
         self.str_accuracy, self.update_accuracy = tf.metrics.accuracy(self.labels, self.pred)
         precision, self.update_precision = tf.metrics.precision(self.labels, self.pred)
-        #recall, self.update_recall = tf.metrics.recall(self.labels, self.pred)
         recall, self.update_recall = tf.metrics.recall(self.labels, self.pred)
 
-        #self.f1 = 2 * precision * recall / (precision + recall)
         self.f1 = 2 * precision * recall / (precision + recall)
         self.precision = precision
         self.recall = recall

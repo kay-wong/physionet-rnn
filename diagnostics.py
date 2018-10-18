@@ -49,10 +49,7 @@ class Diagnostics(object):
 
         v_acc, v_loss, v_summary, y_true, y_pred = sess.run([model.accuracy, model.cost, model.merge_op, model.labels, model.pred], feed_dict=feed_dict_test)
         model.test_writer.add_summary(v_summary)
-        print(y_pred)
-        print(y_true)
-        #v_f1 = f1_score(y_true, y_pred, average='macro', labels=np.unique(y_pred))
-        #v_sensitivity = recall_score(y_true, y_pred,  average='weighted', labels=np.unique(y_pred))
+        
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
         v_sensitivity = tp/(tp+fn)
         v_p = tp/(tp+fp)
@@ -70,11 +67,15 @@ class Diagnostics(object):
                             global_step=epoch)
                 print('Graph saved to file: {}'.format(save_path))
 
+                save_path = saver.save(sess, os.path.join(directories.checkpoints, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)), global_step=epoch)
+                print('Graph saved to file: {}'.format(save_path))
+
+
         if epoch % 10 == 0 and epoch>10:
             save_path = saver.save(sess, os.path.join(directories.checkpoints, '{0}/rnn_{0}_epoch{1}.ckpt'.format(name, epoch)), global_step=epoch)
             print('Graph saved to file: {}'.format(save_path))
 
-        msg = 'Epoch {} | S1: {:.3f} | Training Acc: {:.3f} | Test Acc/+P: {:.3f} | Test Se: {:.3f}| Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, v_s1, t_acc, v_acc, v_sensitivity, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
+        msg = 'Epoch {} | S1: {:.3f} | Training Acc: {:.3f} | Test Acc: {:.3f} | Test P+ {:.3f} | Test Se: {:.3f}| Train Loss: {:.3f} | Test Loss: {:.3f} | Rate: {} examples/s ({:.2f} s) {}'.format(epoch, v_s1, t_acc, v_acc, v_p, v_sensitivity, t_loss, v_loss, int(config.batch_size/(time.time()-t0)), time.time() - start_time, improved)
         print(msg)
         with open(os.path.join(directories.trainlogs, '{}.txt'.format(name)), 'a') as f:
             f.write(msg)
