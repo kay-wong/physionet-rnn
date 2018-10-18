@@ -52,7 +52,7 @@ def evaluate(config, directories, ckpt, args):
 
 
         results_preds = pd.DataFrame({'True': y_true, 'Pred':y_pred})
-        results_preds.to_csv('PredOutputs.csv')
+        results_preds.to_csv('./data/outputs/PredOutputs.csv')
 
         print("Validation accuracy: {:.3f}".format(v_acc))
         print("Validation Se: {:.3f}".format(v_sensitivity))
