@@ -17,9 +17,6 @@ tf.logging.set_verbosity(tf.logging.ERROR)
 def evaluate(config, directories, ckpt, args):
     pin_cpu = tf.ConfigProto(allow_soft_placement=True, device_count = {'GPU':0})
     start = time.time()
-    #eval_record_paths = glob.glob('{}/*.record'.format(directories.eval))
-    #eval_tokens, eval_labels = Data.load_data_tfrecords(eval_record_paths)
-    
         
     # Build graph
     model = Model(config, directories, args=args, evaluate=True)
@@ -55,7 +52,7 @@ def evaluate(config, directories, ckpt, args):
 
 
         results_preds = pd.DataFrame({'True': y_true, 'Pred':y_pred})
-        results_preds.to_csv('PredOutputs_setc1.csv')
+        results_preds.to_csv('PredOutputs.csv')
 
         print("Validation accuracy: {:.3f}".format(v_acc))
         print("Validation Se: {:.3f}".format(v_sensitivity))
