@@ -26,7 +26,7 @@ class Model():
         self.test_labels_placeholder = tf.placeholder(tf.int64)
         
         # Balanced test distribution
-        train_paths = directories.train
+        train_paths = glob.glob('{}/*.record'.format(directories.train)) 
         
         train_record_paths, test_record_paths = train_test_split(train_paths, train_size = 0.6, random_state=42)
         steps_per_epoch = len(train_record_paths)//config.batch_size

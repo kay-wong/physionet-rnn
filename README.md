@@ -12,4 +12,4 @@ python3 train.py -opt momentum --name name_of_model
 python3 evaluate.py -r 'path_to_ckpt'
 
 ### To evaluate on pretrained best-fit model
-python3 evaluate.py -r 'path_to_ckpt' 'checkpoints/best/physiornn_best/rnn_physiornn_112_epoch80.ckpt-80'
+python3 evaluate.py -r 'checkpoints/best/physiornn_best/rnn_physiornn_112_epoch80.ckpt-80'
